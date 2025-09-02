@@ -1,0 +1,48 @@
+repos:
+  - id: gitlab.com/acme/gcp-tf-network
+    apply_requirements: [approved, mergeable]
+    import_requirements: [approved, mergeable]
+    delete_source_branch_on_merge: true
+    allowed_overrides: ["workflow"]
+    allowed_workflows: ["gcp-tf-network-dev", "gcp-tf-network-prod"]
+
+workflows:
+  gcp-tf-network-dev:
+    plan:
+      steps:
+        - env:
+            name: GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+            value: atlantis-network-dev@acme.iam.gserviceaccount.com
+        - run: rm -rf .terraform
+        - init:
+            extra_args:
+              ["-lock=false", "-backend-config=env/dev/backend-config.tfvars"]
+        - plan:
+            extra_args: ["-lock=false", "-var-file=env/dev/vars.tfvars"]
+    apply:
+      steps:
+        - env:
+            name: GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+            value: atlantis-network-dev@acme.iam.gserviceaccount.com
+        - apply:
+            extra_args: ["-lock=false"]
+
+  gcp-tf-network-prod:
+    plan:
+      steps:
+        - env:
+            name: GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+            value: atlantis-network-prod@acme.iam.gserviceaccount.com
+        - run: rm -rf .terraform
+        - init:
+            extra_args:
+              ["-lock=false", "-backend-config=env/prod/backend-config.tfvars"]
+        - plan:
+            extra_args: ["-lock=false", "-var-file=env/prod/vars.tfvars"]
+    apply:
+      steps:
+        - env:
+            name: GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+            value: atlantis-network-prod@acme.iam.gserviceaccount.com
+        - apply:
+            extra_args: ["-lock=false"]

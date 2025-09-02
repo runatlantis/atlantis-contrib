@@ -1,0 +1,17 @@
+repos:
+  - id: github.com/acme/gcp-tf-management
+    apply_requirements: [approved, mergeable]
+    import_requirements: [approved, mergeable]
+    allowed_overrides: ["workflow"]
+    allowed_workflows: ["example"]
+    delete_source_branch_on_merge: true
+
+workflows:
+  example:
+    plan:
+      steps:
+        - init
+        - plan
+    apply:
+      steps:
+        - apply
