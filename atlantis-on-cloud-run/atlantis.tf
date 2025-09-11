@@ -130,52 +130,6 @@ resource "google_compute_managed_ssl_certificate" "atlantis" {
   project = local.project_id
 }
 
-# To protect the Atlantis UI using Identity-Aware Proxy (IAP) we need to create an OAuth2 client ID and secret
-# These are stored in Secret Manager and referenced in the backend services below.
-# The client ID and secret need to be created manually in the Google Cloud Console
-# at https://console.cloud.google.com/apis/credentials
-resource "google_secret_manager_secret" "atlantis_oauth2_client_id" {
-  secret_id = "atlantis-oauth2-client-id"
-  replication {
-    user_managed {
-      replicas {
-        location = "europe-west4"
-      }
-      replicas {
-        location = "europe-west1"
-      }
-    }
-  }
-  deletion_protection = true
-  project             = local.project_id
-}
-
-data "google_secret_manager_secret_version_access" "atlantis_oauth2_client_id" {
-  secret  = google_secret_manager_secret.atlantis_oauth2_client_id.id
-  project = google_secret_manager_secret.atlantis_oauth2_client_id.project
-}
-
-resource "google_secret_manager_secret" "atlantis_oauth2_client_secret" {
-  secret_id = "atlantis-oauth2-client-secret"
-  replication {
-    user_managed {
-      replicas {
-        location = "europe-west4"
-      }
-      replicas {
-        location = "europe-west1"
-      }
-    }
-  }
-  deletion_protection = true
-  project             = local.project_id
-}
-
-data "google_secret_manager_secret_version_access" "atlantis_oauth2_client_secret" {
-  secret  = google_secret_manager_secret.atlantis_oauth2_client_secret.id
-  project = google_secret_manager_secret.atlantis_oauth2_client_secret.project
-}
-
 # This is where the load balancing magic happens, 
 ## routing traffic to the correct backend service based on the hostname and path
 resource "google_compute_url_map" "atlantis" {
